@@ -3,8 +3,12 @@ var InMemoryStore = require('./inMemoryStore.js');
 var Q = require('q');
 
 var ChunkFetcher = function(options){
+
+  var MAX_ERROR_COUNT = 20;
+
   var page = 1,
   errorTimeout = null,
+  errorCount = 0,
   hold = false;
   
   options.store = options.store || InMemoryStore;
@@ -62,19 +66,24 @@ var ChunkFetcher = function(options){
         }
       })
       .fail(function(error){
-        process.exit(1);
-        // console.log('error while fetching ' + options.key);
+
+
+        if (errorCount > MAX_ERROR_COUNT){
+          process.exit(1);
+        }
+
+        console.log('error while fetching ' + options.key);
         
-        // //it might happen that some requests fail (SO seems to throttle our requests if
-        // //we exceed a certain limit). So in case a request fails, we will just wait for
-        // //N seconds and then continue.
-        // if (errorTimeout){
-        //   clearTimeout(errorTimeout);
-        // }
-        // errorTimeout = setTimeout(function(){
-        //   console.log('retrying fetching ' + options.key);
-        //   fetch(deferred);
-        // }, 5000);
+        //it might happen that some requests fail (SO seems to throttle our requests if
+        //we exceed a certain limit). So in case a request fails, we will just wait for
+        //N seconds and then continue.
+        if (errorTimeout){
+          clearTimeout(errorTimeout);
+        }
+        errorTimeout = setTimeout(function(){
+          console.log('retrying fetching ' + options.key);
+          fetch(deferred);
+        }, 5000);
       });
 
       return deferred.promise;
