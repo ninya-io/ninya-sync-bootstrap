@@ -67,7 +67,7 @@ var ChunkFetcher = function(options){
       })
       .fail(function(error){
 
-
+        errorCount++;
         if (errorCount > MAX_ERROR_COUNT){
           process.exit(1);
         }
