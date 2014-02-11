@@ -8,11 +8,13 @@ module.exports = function(app) {
     var https = require('https');
     var pg = require('pg').native;
 
+    var PAGE_SIZE = 10;
+
     var rebuild = function(){
         new ChunkFetcher({
             url: 'http://api.stackoverflow.com/1.1/users?',
             key: 'users',
-            pageSize: 100,
+            pageSize: PAGE_SIZE,
             maxLength: 20000,
             interceptor: userTagInterceptor,
             store: PostgresDbStore
@@ -42,7 +44,7 @@ module.exports = function(app) {
                 new ChunkFetcher({
                     url: 'http://api.stackoverflow.com/1.1/users?&max=' + reputation,
                     key: 'users',
-                    pageSize: 100,
+                    pageSize: PAGE_SIZE,
                     maxLength: 20000,
                     interceptor: userTagInterceptor,
                     store: PostgresDbStore
