@@ -72,7 +72,10 @@ var ChunkFetcher = function(options){
           process.exit(1);
         }
 
-        console.log('error while fetching ' + options.key);
+        var remainingTries = MAX_ERROR_COUNT - errorCount;
+        console.log('error while fetching ' + options.key );
+        console.log(remainingTrys + ' remaining tries');
+        
         
         //it might happen that some requests fail (SO seems to throttle our requests if
         //we exceed a certain limit). So in case a request fails, we will just wait for
