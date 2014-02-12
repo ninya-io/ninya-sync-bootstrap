@@ -1,1 +1,1 @@
-web: node server/web.js
+clock: node server/web.js
