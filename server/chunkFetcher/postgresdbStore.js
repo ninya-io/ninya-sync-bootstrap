@@ -25,7 +25,7 @@ var PostgresDbStore = function(){
                 if(err) {
                     return console.error('error fetching client from pool', err);
                 }
-                client.query('INSERT INTO users VALUES($1)', [entity], function(err, result) {
+                client.query('INSERT INTO users_working VALUES($1)', [entity], function(err, result) {
                     done();
 
                     counter++;

@@ -30,9 +30,11 @@ var SyncService = function(liveUserRepository, workingUserRepository, backupUser
             .getCount()
             .then(function(count){
                 if(count >= self.MAX_USER_COUNT){
+                    console.log('ready for migration');
                     deferred.resolve(true);
                 }
                 else{
+                    console.log('NOT ready for migration');
                     deferred.resolve(false);
                 }
             });
@@ -41,6 +43,7 @@ var SyncService = function(liveUserRepository, workingUserRepository, backupUser
     };
 
     self.migrate = function(){
+        console.log('Migrating....');
         return backupUserRepository
                 .clear()
                 .then(backupUserRepository.addFrom.bind(null,liveUserRepository))
