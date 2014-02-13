@@ -22,7 +22,19 @@ module.exports = function(app) {
 
     syncService.MAX_USER_COUNT = 148000;
 
-    var PAGE_SIZE = 10;
+    var PAGE_SIZE = 10,
+        MAX_RUN_TIME_MS = 9 * 60 * 1000;
+
+    setTimeout(function () {
+        console.log('reached maximum job uptime...going down.');
+        // This is for safety. We don't won't multiple jobs to run at the same time.
+        // In the worst case job A gets the resume point (e.g. 200 rep) at startup while
+        // job B is just about to wipe out the data. Then job A would insert users with
+        // rep < 200 AFTER job B already wiped the data. This would mean the sync would
+        // be locked in < 200 rep land.
+        // TODO: Figure out how to avoid multiple instances
+        process.exit(0);
+    }, MAX_RUN_TIME_MS);
 
     var rebuild = function(){
         new ChunkFetcher({
