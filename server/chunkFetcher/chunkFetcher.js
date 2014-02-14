@@ -1,10 +1,16 @@
-var httpUtilities = require('../utilities/http.js');
 var InMemoryStore = require('./inMemoryStore.js');
+var globals = require('../globals.js');
 var Q = require('q');
 
 var ChunkFetcher = function(options){
 
-  var MAX_ERROR_COUNT = 20;
+  var httpUtilities = globals.httpUtilities;
+
+  var MAX_ERROR_COUNT = options.maxErrorCount || 20;
+
+  var onMaxErrorReached = options.onMaxErrorReached || function(){
+    process.exit(1);
+  };
 
   var page = 1,
   errorTimeout = null,
@@ -39,12 +45,13 @@ var ChunkFetcher = function(options){
         console.log('fetched: ' + options.key + ' at ' + new Date());
         console.log(response);
         var chunk = response[options.key];
+        var initialChunkLength = chunk.length;
         
         var proceed = function(){
           store.append(chunk);
           page++;
 
-          if (chunk.length === 0 || (options.maxLength && store.getLength() >= options.maxLength)){
+          if (initialChunkLength === 0 || (page >= options.maxPage) || (options.maxLength && store.getLength() >= options.maxLength)){
             deferred.resolve(store.getAll());
           }
           else {
@@ -69,7 +76,7 @@ var ChunkFetcher = function(options){
 
         errorCount++;
         if (errorCount > MAX_ERROR_COUNT){
-          process.exit(1);
+          onMaxErrorReached();
         }
 
         var remainingTries = MAX_ERROR_COUNT - errorCount;
@@ -86,7 +93,7 @@ var ChunkFetcher = function(options){
         errorTimeout = setTimeout(function(){
           console.log('retrying fetching ' + options.key);
           fetch(deferred);
-        }, 5000);
+        }, options.waitAfterErrorMs || 5000);
       });
 
       return deferred.promise;

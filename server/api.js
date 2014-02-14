@@ -7,7 +7,7 @@ module.exports = function(app) {
     
     var ChunkFetcher = require('./chunkFetcher/chunkFetcher.js');
     var PostgresDbStore = require('./chunkFetcher/postgresdbStore.js');
-    var userTagInterceptor = require('./interceptor/userTagInterceptor.js');
+    var UserTagInterceptor = require('./interceptor/userTagInterceptor.js');
     var https = require('https');
     var pg = require('pg').native;
 
@@ -20,7 +20,7 @@ module.exports = function(app) {
         new UserRepository(USERS_WORKING_TABLE), 
         new UserRepository(USERS_BACKUP_TABLE));
 
-    syncService.MAX_USER_COUNT = 148000;
+    syncService.MAX_USER_COUNT = 150000;
 
     var PAGE_SIZE = 10,
         MAX_RUN_TIME_MS = 9 * 60 * 1000;
@@ -42,7 +42,7 @@ module.exports = function(app) {
             key: 'users',
             pageSize: PAGE_SIZE,
             maxLength: 20000,
-            interceptor: userTagInterceptor,
+            interceptor: new UserTagInterceptor(new PostgresDbStore()),
             store: PostgresDbStore
         })
         .fetch()
@@ -89,7 +89,7 @@ module.exports = function(app) {
                     key: 'users',
                     pageSize: PAGE_SIZE,
                     maxLength: 20000,
-                    interceptor: userTagInterceptor,
+                    interceptor: new UserTagInterceptor(new PostgresDbStore()),
                     store: PostgresDbStore
                 })
                 .fetch()

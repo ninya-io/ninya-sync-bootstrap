@@ -1,3 +1,4 @@
+var Q = require('q');
 var stackWhoConfig = require('../common/config.js');
 var pg = require('pg').native;
 
@@ -13,6 +14,34 @@ var PostgresDbStore = function(){
 
     self.getLength = function(){
         return length;
+    };
+
+    self.exists = function(id){
+        var deferred = Q.defer();
+
+        pg.connect(stackWhoConfig.dbConnectionString, function(err, client, done) {
+            if(err) {
+                return console.error('error fetching client from pool', err);
+            }
+
+            var QUERY = 'SELECT * from users_working WHERE "user"->>\'user_id\' = \'' + id  + '\'';
+
+            client.query(QUERY, function(err, result) {
+                done();
+
+                if(err) {
+                    console.error('error running query', err);
+                    deferred.reject();
+                    return;
+                }
+
+                var exists = result.rows.length > 0;
+
+                deferred.resolve(exists);
+            });
+        });
+
+        return deferred.promise;
     };
 
     self.append = function(chunk){
