@@ -23,7 +23,7 @@ var UserTagInterceptor = function(userStore){
                                 pageSize: 30,
                                 maxLength: 30,
                                 maxPage: 1,
-                                waitAfterErrorMs: 500
+                                waitAfterErrorMs: 1500
                             })
                             .fetch()
                             .then(function(userTags){
