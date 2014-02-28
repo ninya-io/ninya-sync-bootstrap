@@ -20,16 +20,21 @@ var SearchIndexService = function(){
 
         pg.connect(stackWhoConfig.dbConnectionString, function(err, client, done) {
             if(err) {
+                console.log('ElasticSearchSync: could not connect to postgres');
                 deferred.reject(err);
                 return;
             }
+
+            console.log('ElasticSearchSync: connected to postgres');
             client.query(sql, function(err, result) {
                 done();
-
                 if(err) {
+                    console.log('ElasticSearchSync: could not retrieve batch from postgres');
                     return deferred.reject(err);
                 }
 
+                console.log('ElasticSearchSync: retrieved batch from postgres');
+                
                 var tasks = result.rows.map(function(obj){
                     return esClient.index({
                         index: 'production',
@@ -40,9 +45,10 @@ var SearchIndexService = function(){
                 });
 
                 Q.all(tasks)
-                 .then(function(foo){
+                 .then(function(res){
+                    console.log('ElasticSearchSync: added batch');
                     //mark batch as synced
-                    Q.all(result.rows.map(function(obj){
+                    return Q.all(result.rows.map(function(obj){
                         var user = obj.user;
                         user._ninya_io_synced = true;
                         return client.query('UPDATE users SET "user" = $1 WHERE "user"->>\'user_id\' = \'' + user.user_id  + '\'', [user], function(err, result) {
@@ -50,7 +56,10 @@ var SearchIndexService = function(){
                                 console.log(err);
                             }
                         });
-                    }));
+                    }))
+                    .then(function(){
+                        console.log('ElasticSearchSync: flagged batch as processed');
+                    })
                  });
 
                 deferred.resolve(result.rows);
