@@ -1,7 +1,13 @@
 var express = require('express');
 var app = express();
 var https = require('https');
+
+//var SearchIndexService = require('./elasticsearch/searchIndexService.js');
+//var searchIndexService = new SearchIndexService();
+//searchIndexService.createIndex();
+
 var api = require('./api.js')(app);
+
 
 app.use(express.logger());
 
