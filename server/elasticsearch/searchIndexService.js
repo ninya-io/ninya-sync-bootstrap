@@ -11,7 +11,9 @@ var esClient = elasticsearch.Client({
 
 var SearchIndexService = function(){
 
-    var BATCH_SIZE = 200;
+    var BATCH_SIZE = 500;
+
+    var iterationCount = 0;
 
     var createIndex = function(searchOptions, fn){
         var deferred = Q.defer();
@@ -27,7 +29,6 @@ var SearchIndexService = function(){
 
             console.log('ElasticSearchSync: connected to postgres');
             client.query(sql, function(err, result) {
-                done();
                 if(err) {
                     console.log('ElasticSearchSync: could not retrieve batch from postgres');
                     return deferred.reject(err);
@@ -35,6 +36,12 @@ var SearchIndexService = function(){
 
                 console.log('ElasticSearchSync: retrieved batch from postgres');
                 
+                if (result.rows.length === 0){
+                    console.log('ElasticSearchSync: sync finished');
+                    deferred.resolve('finished');
+                    return;
+                }
+
                 var tasks = result.rows.map(function(obj){
                     return esClient.index({
                         index: 'production',
@@ -58,11 +65,13 @@ var SearchIndexService = function(){
                         });
                     }))
                     .then(function(){
+                        iterationCount++;
                         console.log('ElasticSearchSync: flagged batch as processed');
+                        console.log('ElasticSearchSync: finished ' + iterationCount + ' iteration(s)');
+                        //start over
+                        createIndex();
                     })
                  });
-
-                deferred.resolve(result.rows);
             });
         });
 
