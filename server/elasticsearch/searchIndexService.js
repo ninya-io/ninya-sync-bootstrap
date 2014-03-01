@@ -11,14 +11,23 @@ var esClient = elasticsearch.Client({
 
 var SearchIndexService = function(){
 
-    var BATCH_SIZE = 500;
+    var BATCH_SIZE = 500,
+        TABLE_NAME = 'users_working';
 
     var iterationCount = 0;
 
     var createIndex = function(searchOptions, fn){
         var deferred = Q.defer();
 
-        var sql = 'SELECT * FROM users WHERE ("user"->>\'_ninya_io_synced\')::boolean is null LIMIT ' + BATCH_SIZE;
+        var sql = 'SELECT * FROM ' + TABLE_NAME + ' WHERE ("user"->>\'_ninya_io_synced\')::boolean is null LIMIT ' + BATCH_SIZE;
+
+
+        var rejectWithError = function(err){
+            console.log('ElasticSearchSync: error ->' + err);
+            deferred.reject(err);
+        };
+
+        console.log('ElasticSearchSync: connecting to postgres...');
 
         pg.connect(stackWhoConfig.dbConnectionString, function(err, client, done) {
             if(err) {
@@ -58,7 +67,7 @@ var SearchIndexService = function(){
                     return Q.all(result.rows.map(function(obj){
                         var user = obj.user;
                         user._ninya_io_synced = true;
-                        return client.query('UPDATE users SET "user" = $1 WHERE "user"->>\'user_id\' = \'' + user.user_id  + '\'', [user], function(err, result) {
+                        return client.query('UPDATE ' + TABLE_NAME + ' SET "user" = $1 WHERE "user"->>\'user_id\' = \'' + user.user_id  + '\'', [user], function(err, result) {
                             if (err){
                                 console.log(err);
                             }
@@ -66,12 +75,13 @@ var SearchIndexService = function(){
                     }))
                     .then(function(){
                         iterationCount++;
+                        done();
                         console.log('ElasticSearchSync: flagged batch as processed');
                         console.log('ElasticSearchSync: finished ' + iterationCount + ' iteration(s)');
                         //start over
                         createIndex();
-                    })
-                 });
+                    });
+                 }, rejectWithError);
             });
         });
 
