@@ -1,7 +1,7 @@
 {
-  "name": "stackwho-server",
-  "version": "0.0.0",
-  "description": "the backend for the stackwho app",
+  "name": "ninya-sync-stackexchange",
+  "version": "0.1.0",
+  "description": "A simple synchronization library for StackExchange sites",
   "main": "web.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

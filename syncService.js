@@ -1,6 +1,13 @@
-module.exports = function(app) {
+/* options.liveTable = users,
+   options.workingTable = users_working,
+   options.backupTable = users_backup,
+   options.dbConnectionString,
+   options.maxEntityCount = 150000,
+   options.pageSize = 10,
+   options.maxRunTime = 9 * 60 * 1000
+*/
 
-    var stackWhoConfig = require('./common/config.js');
+function SyncService (options) {
 
     var SyncService = require('./sync/syncService.js');
     var UserRepository = require('./sync/userRepository.js');
@@ -11,19 +18,23 @@ module.exports = function(app) {
     var https = require('https');
     var pg = require('pg').native;
 
-    var USERS_LIVE_TABLE    = 'users',
-        USERS_WORKING_TABLE = 'users_working',
-        USERS_BACKUP_TABLE  = 'users_backup';
+    var ConnectedPostgresDbStore = function(){
+        return new PostgresDbStore(options.dbConnectionString);
+    };
+
+    var USERS_LIVE_TABLE    = options.liveTable,
+        USERS_WORKING_TABLE = options.workingTable,
+        USERS_BACKUP_TABLE  = options.backupTable;
 
     var syncService = new SyncService(
-        new UserRepository(USERS_LIVE_TABLE), 
-        new UserRepository(USERS_WORKING_TABLE), 
-        new UserRepository(USERS_BACKUP_TABLE));
+        new UserRepository(options.dbConnectionString, USERS_LIVE_TABLE),
+        new UserRepository(options.dbConnectionString, USERS_WORKING_TABLE),
+        new UserRepository(options.dbConnectionString, USERS_BACKUP_TABLE));
 
-    syncService.MAX_USER_COUNT = 150000;
+    syncService.MAX_USER_COUNT = options.maxEntityCount;
 
-    var PAGE_SIZE = 10,
-        MAX_RUN_TIME_MS = 9 * 60 * 1000;
+    var PAGE_SIZE = options.pageSize,
+        MAX_RUN_TIME_MS = options.maxRunTime;
 
     setTimeout(function () {
         console.log('reached maximum job uptime...going down.');
@@ -42,8 +53,8 @@ module.exports = function(app) {
             key: 'users',
             pageSize: PAGE_SIZE,
             maxLength: 20000,
-            interceptor: new UserTagInterceptor(new PostgresDbStore()),
-            store: PostgresDbStore
+            interceptor: new UserTagInterceptor(new ConnectedPostgresDbStore()),
+            store: ConnectedPostgresDbStore
         })
         .fetch()
         .then(function(users){
@@ -69,7 +80,7 @@ module.exports = function(app) {
     };
 
     var resume = function(){
-        pg.connect(stackWhoConfig.dbConnectionString, function(err, client, done) {
+        pg.connect(options.dbConnectionString, function(err, client, done) {
             if(err) {
                 return console.error('error fetching client from pool', err);
             }
@@ -89,8 +100,8 @@ module.exports = function(app) {
                     key: 'users',
                     pageSize: PAGE_SIZE,
                     maxLength: 20000,
-                    interceptor: new UserTagInterceptor(new PostgresDbStore()),
-                    store: PostgresDbStore
+                    interceptor: new UserTagInterceptor(new ConnectedPostgresDbStore()),
+                    store: ConnectedPostgresDbStore
                 })
                 .fetch()
                 .then(function(users){
@@ -106,5 +117,11 @@ module.exports = function(app) {
 
     };
 
-    safeResume();
+    return{
+        resume: resume,
+        safeResume: safeResume,
+        rebuild: rebuild
+    }
 };
+
+module.exports = SyncService;

@@ -1,8 +1,7 @@
 var Q = require('q');
-var stackWhoConfig = require('../common/config.js');
 var pg = require('pg').native;
 
-var PostgresDbStore = function(){
+var PostgresDbStore = function(dbConnectionString){
     var self = {};
     var data = [];
     var length = 0;
@@ -19,7 +18,7 @@ var PostgresDbStore = function(){
     self.exists = function(id){
         var deferred = Q.defer();
 
-        pg.connect(stackWhoConfig.dbConnectionString, function(err, client, done) {
+        pg.connect(dbConnectionString, function(err, client, done) {
             if(err) {
                 return console.error('error fetching client from pool', err);
             }
@@ -50,7 +49,7 @@ var PostgresDbStore = function(){
         chunk.forEach(function(entity){
             //connections are pooled. However, we should still investigate if it's the
             //right thing to call pg.connect inside the loop.
-            pg.connect(stackWhoConfig.dbConnectionString, function(err, client, done) {
+            pg.connect(dbConnectionString, function(err, client, done) {
                 if(err) {
                     return console.error('error fetching client from pool', err);
                 }

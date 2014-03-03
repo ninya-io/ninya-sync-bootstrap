@@ -1,8 +1,7 @@
 var Q = require('q');
 var pg = require('pg').native;
-var stackWhoConfig = require('../common/config.js');
 
-var UserRepository = function(name){
+var UserRepository = function(dbConnectionString, name){
     var self = {},
         users = [];
     
@@ -22,7 +21,7 @@ var UserRepository = function(name){
 
         var deferred = Q.defer();
 
-        pg.connect(stackWhoConfig.dbConnectionString, function(err, client, done) {
+        pg.connect(dbConnectionString, function(err, client, done) {
             if(err) {
                 return console.error('error fetching client from pool', err);
             }
@@ -49,7 +48,7 @@ var UserRepository = function(name){
 
         var deferred = Q.defer();
 
-        pg.connect(stackWhoConfig.dbConnectionString, function(err, client, done) {
+        pg.connect(dbConnectionString, function(err, client, done) {
             if(err) {
                 return console.error('error fetching client from pool', err);
             }
@@ -75,7 +74,7 @@ var UserRepository = function(name){
     self.getCount = function(){
         var deferred = Q.defer();
 
-        pg.connect(stackWhoConfig.dbConnectionString, function(err, client, done) {
+        pg.connect(dbConnectionString, function(err, client, done) {
             if(err) {
                 return console.error('error fetching client from pool', err);
             }
