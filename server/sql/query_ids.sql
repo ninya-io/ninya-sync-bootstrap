@@ -1,1 +1,0 @@
-﻿SELECT "user"->>'_id' as _id, "user"->>'top_tags' as top_tags from users WHERE 'layout' in (Select value->>'tag_name' FROM json_array_elements("user"->'top_tags'))
