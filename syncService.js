@@ -49,11 +49,11 @@ function SyncService (options) {
 
     var rebuild = function(){
         new ChunkFetcher({
-            url: 'http://api.stackoverflow.com/1.1/users?',
-            key: 'users',
+            url: 'http://api.stackexchange.com/2.2/users?order=desc&site=' + options.stackexchangeSite,
+            key: 'items',
             pageSize: PAGE_SIZE,
             maxLength: 20000,
-            interceptor: new UserTagInterceptor(new ConnectedPostgresDbStore()),
+            interceptor: new UserTagInterceptor(new ConnectedPostgresDbStore(), options.stackexchangeSite),
             store: ConnectedPostgresDbStore
         })
         .fetch()

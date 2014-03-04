@@ -18,8 +18,8 @@ var UserTagInterceptor = function(userStore){
                     else {
                         return Q.all(users.map(function(user){
                             return new ChunkFetcher({
-                                url: 'http://api.stackoverflow.com/1.1/users/' + user.user_id + '/top-answer-tags?',
-                                key: 'top_tags',
+                                url: 'http://api.stackexchange.com/2.2/users/' + user.user_id + '/top-answer-tags?site=' + options.stackexchangeSite,
+                                key: 'items',
                                 pageSize: 30,
                                 maxLength: 30,
                                 maxPage: 1,
