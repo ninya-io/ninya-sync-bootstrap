@@ -3,7 +3,8 @@ var SyncService = require('ninya-sync-elasticsearch');
 
 var syncService = new SyncService({
     batchSize: 500,
-    tableName: 'users_working',
+    tableName: 'users',
+    elasticsearchIndex: 'production_v2',
     dbConnectionString: config.dbConnectionString,
     elasticsearchEndpoint: config.elasticsearchEndpoint
 });
