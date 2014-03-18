@@ -15,3 +15,9 @@ syncService
     .then(function(){
         process.exit();
     });
+
+
+//let it run for a maximum of 9 minutes to not have jobs queing up
+setTimeout(function(){
+    process.exit();
+}, 9 * 60 * 1000);
