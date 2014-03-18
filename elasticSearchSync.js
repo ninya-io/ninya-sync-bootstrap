@@ -5,6 +5,7 @@ var syncService = new SyncService({
     batchSize: 350,
     tableName: 'users',
     elasticsearchIndex: 'production_v4',
+    stackexchangeSite: 'stackoverflow',
     dbConnectionString: config.dbConnectionString,
     elasticsearchEndpoint: config.elasticsearchEndpoint
 });
