@@ -1,15 +1,13 @@
 var config = require('./config.js');
-var SyncService = require('ninya-sync-stackexchange');
+var StackExchangeSync = require('ninya-sync-stackexchange');
 
-var syncService = new SyncService({
-    liveTable: 'users',
-    workingTable: 'users_working',
-    backupTable: 'users_backup',
+var sync = new StackExchangeSync({
+    index: 'production_v4',
+    elasticsearchEndpoint: config.elasticsearchEndpoint,
     stackexchangeSite: 'stackoverflow',
-    dbConnectionString: config.dbConnectionString,
     maxEntityCount: 150000,
     pageSize: 10,
     maxRunTime: 9 * 60 * 1000
 });
 
-syncService.safeResume();
+sync.safeResume();
