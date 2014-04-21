@@ -1,6 +1,6 @@
 {
-  "name": "stackwho-server",
-  "version": "0.0.0",
+  "name": "ninya-sync-bootstrap",
+  "version": "0.1.0",
   "description": "the backend for the stackwho app",
   "main": "web.js",
   "scripts": {
@@ -9,13 +9,6 @@
   "author": "Christoph Burgdorf <christoph.burgdorf@bvsn.org> (http://cburgdorf.wordpress.com/)",
   "license": "MIT",
   "dependencies": {
-    "express": "3.1.x",
-    "nano": "~4.1.1",
-    "q": "~0.9.6",
-    "q-io": "~1.9.4",
-    "lodash": "~1.3.1",
-    "pg": "~2.8.3",
-    "elasticsearch": "1.5.8",
     "ninya-sync-stackexchange": "0.2.x"
   },
   "engines": {
@@ -23,7 +16,6 @@
     "npm": "1.2.x"
   },
   "devDependencies": {
-    "nano": "~4.1.1",
     "should": "~3.1.2",
     "chai": "~1.9.0"
   }
